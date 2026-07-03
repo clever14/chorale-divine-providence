@@ -1,0 +1,90 @@
+:root {
+  /* ---- Couleurs primaires ---- */
+  --navy: #041f60;
+  --navy-dark: #02153f;
+  --blue-deep: #0a3a8c;
+  --blue-mid: #066a9e;
+
+  /* ---- Cyan (accent / actions) ---- */
+  --cyan: #039fc8;
+  --cyan-dark: #0379ad;
+  --cyan-light: #7fd5ee;
+  --cyan-soft: #9fc4e8;
+
+  /* ---- Or (admin / mise en avant) ---- */
+  --gold: #e0a92b;
+  --gold-dark: #cf8f12;
+  --gold-light: #ffd25e;
+
+  /* ---- États ---- */
+  --red: #d0473e;
+  --red-bg: #fbeceb;
+  --green: #4d7a2e;
+  --green-bg: #eef3e9;
+  --pink: #b03a6e;
+  --pink-bg: #fbeaf2;
+  --whatsapp: #25d366;
+
+  /* ---- Fonds ---- */
+  --app-bg: #f5f7fa;
+  --app-bg-2: #f4f7fc;
+  --card-bg: #ffffff;
+  --field-bg: #f2f5fa;
+
+  /* ---- Textes ---- */
+  --title: #041f60;
+  --body: #3a4255;
+  --body-2: #5b6478;
+  --muted: #9aa3b2;
+  --muted-2: #8a93a6;
+
+  /* ---- Bordures ---- */
+  --border: #e3e7ee;
+  --border-2: #eef1f6;
+  --border-3: #f0f2f6;
+
+  /* ---- Rayons ---- */
+  --r-field: 13px;
+  --r-card: 18px;
+  --r-card-lg: 20px;
+  --r-chip: 18px;
+
+  /* ---- Ombres ---- */
+  --sh-card: 0 4px 16px rgba(4, 31, 96, 0.05);
+  --sh-card-2: 0 6px 22px rgba(4, 31, 96, 0.06);
+  --sh-btn: 0 10px 24px rgba(4, 31, 96, 0.28);
+  --sh-btn-cyan: 0 5px 14px rgba(3, 159, 200, 0.4);
+
+  /* ---- Dégradés ---- */
+  --grad-banner: linear-gradient(160deg, #041f60, #0a3a8c 80%, #066a9e);
+  --grad-banner-admin: linear-gradient(160deg, #02153f, #0a3a8c 90%, #066a9e);
+  --grad-btn: linear-gradient(135deg, #041f60, #0a3a8c);
+  --grad-btn-cyan: linear-gradient(135deg, #039fc8, #0379ad);
+  --grad-btn-gold: linear-gradient(135deg, #ffd25e, #e0a92b);
+
+  /* ---- Typo ---- */
+  --font-ui: 'Montserrat', system-ui, sans-serif;
+  --font-serif: 'Libre Baskerville', Georgia, serif;
+
+  /* ---- Safe areas iOS ---- */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---- Mode sombre (toggle profil) : appliqué via .dark sur <html> ---- */
+html.dark {
+  --app-bg: #0b1020;
+  --app-bg-2: #0b1020;
+  --card-bg: #131a2e;
+  --field-bg: #1a2238;
+  --title: #eaf0ff;
+  --body: #cdd5e6;
+  --body-2: #aab3c7;
+  --muted: #7b8499;
+  --muted-2: #6c7590;
+  --border: #232c44;
+  --border-2: #1e2740;
+  --border-3: #1b2338;
+  --sh-card: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --sh-card-2: 0 6px 22px rgba(0, 0, 0, 0.4);
+}
