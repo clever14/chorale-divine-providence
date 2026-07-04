@@ -57,7 +57,7 @@ export default function AdminHome() {
         </div>
 
         <div className="center stack" style={{ gap: 8, padding: '10px 20px 0', position: 'relative' }}>
-          <img src="/logo-gold.png" alt="Chorale Divine Providence" style={{ width: 118, filter: 'drop-shadow(0 6px 18px rgba(224,169,43,.35))' }} />
+          <img src="/logo-gold-pad.png" alt="Chorale Divine Providence" style={{ width: 132, height: 'auto', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 6px 18px rgba(224,169,43,.3))' }} />
           <div style={{ font: '700 22px var(--font-serif)', textAlign: 'center' }}>Espace Administrateur</div>
           <div style={{ font: 'italic 400 12.5px var(--font-serif)', color: 'var(--cyan-soft)' }}>Gérez la vie de la chorale</div>
         </div>

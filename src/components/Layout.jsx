@@ -39,13 +39,13 @@ export function TabHeader({ title, greeting, name, avatar }) {
   return (
     <div className="spread" style={{ padding: '4px 20px 14px' }}>
       {greeting ? (
-        <div className="row" style={{ gap: 12 }}>
+        <button className="tap row" onClick={() => nav('/profile')} style={{ gap: 12, textAlign: 'left' }} aria-label="Mon profil">
           {avatar}
           <div className="stack">
             <span style={{ font: '400 12px var(--font-ui)', color: 'var(--muted)' }}>{greeting}</span>
             <span style={{ font: '700 18px var(--font-serif)', color: 'var(--title)' }}>{name}</span>
           </div>
-        </div>
+        </button>
       ) : (
         <span className="big-title">{title}</span>
       )}

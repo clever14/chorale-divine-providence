@@ -48,6 +48,8 @@ a { color: inherit; text-decoration: none; }
   .app-shell { padding: 0; background: var(--app-bg); }
   .phone { width: 100%; height: 100dvh; border-radius: 0; padding: 0; box-shadow: none; }
   .phone-screen { border-radius: 0; }
+  /* iOS zoome sur un champ dont la police fait < 16px : on force 16px sur mobile. */
+  .field, input, textarea, select { font-size: 16px; }
 }
 
 /* ============ Écran (colonne + zone scroll) ============ */

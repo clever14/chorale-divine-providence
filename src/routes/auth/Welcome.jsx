@@ -23,7 +23,7 @@ export default function Welcome() {
       <div className="screen-scroll" style={{ display: 'flex', flexDirection: 'column', padding: '20px 30px 30px' }}>
         <div className="grow center stack" style={{ gap: 22, position: 'relative' }}>
           <div style={{ position: 'absolute', top: 8, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(3,159,200,.16), rgba(3,159,200,0) 70%)' }} />
-          <img src="/logo.png" alt="Chorale Divine Providence" style={{ width: 210, position: 'relative' }} />
+          <img src="/logo-pad.png" alt="Chorale Divine Providence" style={{ width: 232, height: 'auto', objectFit: 'contain', position: 'relative' }} />
           <p className="serif" style={{ textAlign: 'center', font: 'italic 400 15px var(--font-serif)', color: 'var(--body-2)', lineHeight: 1.6, position: 'relative', margin: 0 }}>
             L'application de la chorale,<br />réservée à ses membres
           </p>

@@ -68,6 +68,7 @@ export default function App() {
       {/* --- Choriste : onglets principaux (barre visible) --- */}
       <Route element={<RequireActive><ChoristerShell /></RequireActive>}>
         <Route path="/app" element={<Dashboard />} />
+        <Route path="/feed" element={<Feed />} />
         <Route path="/songs" element={<Songs />} />
         <Route path="/agenda" element={<Agenda />} />
         <Route path="/profile" element={<Profile />} />
@@ -75,7 +76,6 @@ export default function App() {
 
       {/* --- Choriste : écrans empilés (plein écran) --- */}
       <Route element={<RequireActive><Outlet /></RequireActive>}>
-        <Route path="/feed" element={<Feed />} />
         <Route path="/songs/:id" element={<SongDetail />} />
         <Route path="/chorist-of-month" element={<ChoristOfMonth />} />
         <Route path="/messages" element={<Messages />} />
