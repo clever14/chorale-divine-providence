@@ -1,24 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 import { CaretLeft, Bell, EnvelopeSimple } from '@phosphor-icons/react'
 
-export function StatusBar({ onDark = false }) {
-  return (
-    <div className={`statusbar${onDark ? ' on-dark' : ''}`}>
-      <span>9:41</span>
-      <span className="signal">
-        <i className="ph-fill ph-cell-signal-full" />
-        <i className="ph-fill ph-wifi-high" />
-        <i className="ph-fill ph-battery-full" />
-      </span>
-    </div>
-  )
+export function StatusBar() {
+  // Plus de faux "9:41" : on ne garde qu'une réserve d'espace pour la safe-area iOS.
+  return <div className="statusbar-spacer" />
 }
 
 /** Enveloppe d'écran : status bar + zone scrollable. */
 export function Screen({ children, onDark = false, bg, style, noStatusBar = false }) {
   return (
     <div className="screen" style={{ background: bg, ...style }}>
-      {!noStatusBar && <StatusBar onDark={onDark} />}
+      {!noStatusBar && <StatusBar />}
       <div className="screen-scroll">{children}</div>
     </div>
   )

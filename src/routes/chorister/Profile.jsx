@@ -29,8 +29,8 @@ export default function Profile() {
       <div className="pad" style={{ paddingTop: 18, paddingBottom: 30 }}>
         <span className="label" style={{ display: 'block', marginBottom: 10 }}>Coordonnées</span>
         <div className="card stack" style={{ padding: '4px 0', marginBottom: 20 }}>
-          <InfoRow icon={<EnvelopeSimple size={20} />} label="Email" value={profile?.email} />
           <InfoRow icon={<Phone size={20} />} label="Téléphone" value={profile?.phone || '—'} />
+          <InfoRow icon={<EnvelopeSimple size={20} />} label="Email" value={profile?.contact_email || '—'} />
           <InfoRow icon={<MusicNotes size={20} />} label="Pupitre" value={pupitreLabel(profile?.pupitre)} last />
         </div>
 

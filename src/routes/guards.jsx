@@ -8,6 +8,7 @@ export function RequireActive({ children }) {
   if (loading) return <Loader />
   if (!user) return <Navigate to="/" replace />
   if (!profile) return <Loader />
+  if (profile.must_change_password) return <Navigate to="/change-password" replace />
   if (!isActive) return <Navigate to="/pending" replace />
   return children
 }
@@ -27,6 +28,7 @@ export function RedirectIfAuthed({ children }) {
   const { loading, user, profile } = useAuth()
   if (loading) return <Loader />
   if (user && profile) {
+    if (profile.must_change_password) return <Navigate to="/change-password" replace />
     if (profile.role === 'admin') return <Navigate to="/admin" replace />
     if (profile.status === 'active') return <Navigate to="/app" replace />
     return <Navigate to="/pending" replace />

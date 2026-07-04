@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heart, ChatCircle, PlusCircle, Image as ImageIcon } from '@phosphor-icons/react'
+import { Heart, ChatCircle, PlusCircle, Plus, Image as ImageIcon } from '@phosphor-icons/react'
 import { supabase, publicUrl, uploadFile } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useAsync } from '../../hooks/useAsync'
@@ -56,7 +56,9 @@ export default function Feed() {
                 </div>
               </div>
               {post.body && <p style={{ padding: '0 16px 14px', font: '400 14px var(--font-ui)', color: 'var(--body)', lineHeight: 1.6, margin: 0 }}>{post.body}</p>}
-              {photo && <img src={photo} alt="" style={{ width: '100%', maxHeight: 300, objectFit: 'cover' }} />}
+              {photo && (/\.(mp4|webm|mov|m4v)($|\?)/i.test(photo)
+                ? <video src={photo} controls playsInline style={{ width: '100%', maxHeight: 340, background: '#000' }} />
+                : <img src={photo} alt="" style={{ width: '100%', maxHeight: 300, objectFit: 'cover' }} />)}
               <div className="row" style={{ gap: 20, padding: 14 }}>
                 <button className="tap row" onClick={() => toggleReaction(post)} style={{ gap: 6, color: liked ? 'var(--red)' : 'var(--muted)' }}>
                   <Heart size={20} weight={liked ? 'fill' : 'regular'} />
@@ -71,6 +73,12 @@ export default function Feed() {
           )
         })}
       </div>
+
+      {!composing && (
+        <button className="fab tap" onClick={() => setComposing(true)} aria-label="Nouvelle publication">
+          <Plus size={26} weight="bold" />
+        </button>
+      )}
 
       {composing && (
         <Composer
@@ -118,7 +126,7 @@ function Composer({ profile, userId, onClose, onDone, notify }) {
         <span style={{ font: '700 14px var(--font-ui)', color: 'var(--title)' }}>{profile?.full_name}</span>
       </div>
       <textarea className="field" value={body} onChange={(e) => setBody(e.target.value)} placeholder="Partagez une nouvelle, une intention, une photo…" style={{ marginBottom: 14, minHeight: 110 }} />
-      <ImageUpload onFile={setFile} variant="photo" height={170} label="Ajouter une photo" />
+      <ImageUpload onFile={setFile} onError={(m) => notify(m, "error")} accept="image/*,video/*" variant="photo" height={170} label="Ajouter une photo ou une vidéo" />
     </Sheet>
   )
 }

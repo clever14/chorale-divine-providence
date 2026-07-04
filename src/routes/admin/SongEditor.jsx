@@ -7,6 +7,7 @@ import { Field, Button, ChipSelect, Loader } from '../../components/ui'
 import ImageUpload from '../../components/ImageUpload'
 import { useToast, useConfirm } from '../../context/ToastContext'
 import { SONG_CATEGORIES } from '../../data/enums'
+import { FILE_LIMITS, checkFileSize } from '../../lib/config'
 
 export default function SongEditor() {
   const { id } = useParams()
@@ -111,15 +112,15 @@ export default function SongEditor() {
               <span style={{ font: '700 13px var(--font-ui)', color: 'var(--title)' }}>
                 {audioFile ? audioFile.name : existing.audio ? 'Audio actuel — remplacer' : 'Importer un fichier MP3'}
               </span>
-              <span style={{ font: '400 11.5px var(--font-ui)', color: 'var(--muted)' }}>MP3 · max 20 Mo</span>
+              <span style={{ font: '400 11.5px var(--font-ui)', color: 'var(--muted)' }}>{`MP3 · max ${FILE_LIMITS.audio} Mo`}</span>
             </div>
-            <input type="file" accept="audio/*" hidden onChange={(e) => setAudioFile(e.target.files?.[0])} />
+            <input type="file" accept="audio/*" hidden onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; const err = checkFileSize(f, "audio"); if (err) { show(err, "error"); return } setAudioFile(f) }} />
           </label>
         </div>
 
         <div className="stack" style={{ gap: 10, marginBottom: 22 }}>
           <span className="label">Partition (optionnelle)</span>
-          <ImageUpload onFile={setScoreFile} preview={existing.score} accept="image/*,application/pdf" variant="score" height={180} label="Toucher pour ajouter une partition (image ou PDF)" />
+          <ImageUpload onFile={setScoreFile} onError={(m) => show(m, "error")} preview={existing.score} accept="image/*,application/pdf" variant="score" height={180} label={`Partition image ou PDF · max ${FILE_LIMITS.pdf} Mo`} />
         </div>
 
         <Button variant="primary" onClick={save} disabled={busy}>{busy ? 'Enregistrement…' : 'Enregistrer'}</Button>

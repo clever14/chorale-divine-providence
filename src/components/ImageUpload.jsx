@@ -1,18 +1,25 @@
 import { useRef, useState } from 'react'
 import { ImageSquare, FilePdf } from '@phosphor-icons/react'
+import { checkFileSize } from '../lib/config'
 
 /**
  * Emplacement de téléversement (drag & drop + clic).
  * onFile(file) est appelé avec le fichier choisi ; `preview` (URL) l'affiche.
  * variant : 'photo' (ratio large) | 'score' (partition, contain).
+ * onError(message) : callback si le fichier dépasse la limite.
+ * limitKind : 'photo' | 'pdf' | 'video' pour le contrôle de taille.
  */
-export default function ImageUpload({ onFile, preview, accept = 'image/*', variant = 'photo', height = 200, label }) {
+export default function ImageUpload({ onFile, onError, preview, accept = 'image/*', variant = 'photo', height = 200, label, limitKind }) {
   const input = useRef(null)
   const [drag, setDrag] = useState(false)
   const [local, setLocal] = useState(null)
 
   const handle = (file) => {
     if (!file) return
+    // Détermine le type de limite : explicite, sinon d'après le fichier.
+    const kind = limitKind || (file.type.startsWith('video') ? 'video' : file.type === 'application/pdf' ? 'pdf' : 'photo')
+    const err = checkFileSize(file, kind)
+    if (err) { onError?.(err); return }
     setLocal(URL.createObjectURL(file))
     onFile?.(file)
   }

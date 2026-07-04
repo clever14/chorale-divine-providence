@@ -35,7 +35,7 @@ export default function LoginAdmin() {
 
   return (
     <div className="screen" style={{ background: 'linear-gradient(180deg,#02153f,#041f60 60%,#02112f)' }}>
-      <StatusBar onDark />
+      <StatusBar />
       <div className="screen-scroll" style={{ padding: '4px 30px 30px' }}>
         <button className="tap" onClick={() => nav(-1)} style={{ color: '#fff', display: 'flex', marginBottom: 24 }} aria-label="Retour">
           <CaretLeft size={24} weight="bold" />

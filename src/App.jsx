@@ -8,6 +8,7 @@ import Register from './routes/auth/Register'
 import Login from './routes/auth/Login'
 import LoginAdmin from './routes/auth/LoginAdmin'
 import Pending from './routes/auth/Pending'
+import ChangePassword from './routes/auth/ChangePassword'
 
 // Choriste
 import Dashboard from './routes/chorister/Dashboard'
@@ -62,6 +63,7 @@ export default function App() {
       <Route path="/login" element={<RedirectIfAuthed><Login /></RedirectIfAuthed>} />
       <Route path="/admin/login" element={<RedirectIfAuthed><LoginAdmin /></RedirectIfAuthed>} />
       <Route path="/pending" element={<Pending />} />
+      <Route path="/change-password" element={<ChangePassword />} />
 
       {/* --- Choriste : onglets principaux (barre visible) --- */}
       <Route element={<RequireActive><ChoristerShell /></RequireActive>}>
