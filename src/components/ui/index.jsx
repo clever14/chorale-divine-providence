@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, CaretDown } from '@phosphor-icons/react'
+import { X, CaretDown, Eye, EyeSlash } from '@phosphor-icons/react'
 import { initials } from '../../lib/format'
 
 /* ---------- Avatar ---------- */
@@ -50,16 +50,33 @@ export function Sheet({ title, onClose, children, footer }) {
   )
 }
 
-/* ---------- Champ étiqueté ---------- */
-export function Field({ label, icon, textarea, ...props }) {
+/* ---------- Champ étiqueté ----------
+   `reveal` : sur un champ mot de passe, ajoute l'œil afficher/masquer (comme
+   la maquette). Sans `reveal`, le comportement est identique à avant. */
+export function Field({ label, icon, textarea, reveal, type, ...props }) {
+  const [show, setShow] = useState(false)
+  const isReveal = reveal && !textarea
+  const inputType = isReveal ? (show ? 'text' : 'password') : type
   return (
     <label className="stack" style={{ gap: 8, marginBottom: 16 }}>
       {label && <span className="label">{label}</span>}
-      <div className={icon ? 'field-icon' : ''}>
+      <div className={icon ? 'field-icon' : ''} style={isReveal ? { position: 'relative' } : undefined}>
         {icon && <span className="ic">{icon}</span>}
         {textarea
           ? <textarea className="field" {...props} />
-          : <input className="field" {...props} />}
+          : <input className="field" type={inputType} {...props} style={isReveal ? { paddingRight: 44 } : undefined} />}
+        {isReveal && (
+          <button
+            type="button"
+            className="tap"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setShow((s) => !s)}
+            aria-label={show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', display: 'flex' }}
+          >
+            {show ? <EyeSlash size={19} /> : <Eye size={19} />}
+          </button>
+        )}
       </div>
     </label>
   )
