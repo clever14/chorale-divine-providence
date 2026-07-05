@@ -1,6 +1,7 @@
 import { Routes, Route, Outlet } from 'react-router-dom'
 import { RequireActive, RequireAdmin, RedirectIfAuthed } from './routes/guards'
 import TabBar from './components/TabBar'
+import { StatusBar } from './components/Layout'
 
 // Auth / onboarding
 import Welcome from './routes/auth/Welcome'
@@ -46,6 +47,7 @@ import BureauEditor from './routes/admin/BureauEditor'
 function ChoristerShell() {
   return (
     <div className="screen" style={{ background: 'var(--app-bg)' }}>
+      <StatusBar />
       <div className="screen-scroll" style={{ display: 'flex', flexDirection: 'column' }}>
         <Outlet />
       </div>
