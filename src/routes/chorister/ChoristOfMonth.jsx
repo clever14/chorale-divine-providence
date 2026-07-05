@@ -1,5 +1,5 @@
 import { Trophy } from '@phosphor-icons/react'
-import { supabase } from '../../lib/supabase'
+import { supabase, publicUrl } from '../../lib/supabase'
 import { useAsync } from '../../hooks/useAsync'
 import { Screen, BackHeader } from '../../components/Layout'
 import { Avatar, Loader, EmptyState } from '../../components/ui'
@@ -26,24 +26,45 @@ export default function ChoristOfMonth() {
   )
 
   const stats = data.stats || {}
+  const poster = data.image_url ? publicUrl('feed-photos', data.image_url) : null
+
   return (
     <Screen>
       <BackHeader title="Choriste du mois" />
       <div className="pad" style={{ paddingBottom: 30 }}>
-        <div className="center stack" style={{ gap: 14, marginBottom: 22 }}>
-          <div style={{ position: 'relative', padding: 4, borderRadius: '50%', background: 'var(--grad-btn-gold)' }}>
-            <Avatar name={data.profiles?.full_name} initials={data.profiles?.avatar_initials} url={data.profiles?.photo_url} size={120} bg="var(--pink-bg)" color="var(--pink)" />
-            <div className="center" style={{ position: 'absolute', bottom: 0, right: 0, width: 34, height: 34, borderRadius: '50%', background: 'var(--grad-btn-gold)', border: '3px solid #fff' }}>
-              <Trophy size={16} color="#fff" weight="fill" />
-            </div>
-          </div>
-          <div className="center stack" style={{ gap: 4 }}>
-            <span style={{ font: '700 22px var(--font-serif)', color: 'var(--title)' }}>{data.profiles?.full_name}</span>
-            <span style={{ font: '400 13px var(--font-ui)', color: 'var(--muted)' }}>
-              {pupitreLabel(data.profiles?.pupitre)} · {monthName(data.month)}
+        {/* En-tête de félicitations */}
+        <div className="center stack" style={{ gap: 8, marginBottom: 18, textAlign: 'center' }}>
+          <div className="center" style={{ gap: 7 }}>
+            <Trophy size={17} weight="fill" color="var(--gold-dark)" />
+            <span style={{ font: '700 11px var(--font-ui)', letterSpacing: 1.4, textTransform: 'uppercase', color: 'var(--gold-dark)' }}>
+              Choriste du mois · {monthName(data.month)}
             </span>
           </div>
+          <span style={{ font: '700 23px var(--font-serif)', color: 'var(--title)', lineHeight: 1.25 }}>
+            Félicitations à {data.profiles?.full_name}
+          </span>
+          <span style={{ font: '400 13px var(--font-ui)', color: 'var(--muted)' }}>{pupitreLabel(data.profiles?.pupitre)}</span>
         </div>
+
+        {/* Affiche (post Instagram) si publiée, sinon repli sur l'avatar */}
+        {poster ? (
+          <div style={{ marginBottom: 18, borderRadius: 20, overflow: 'hidden', boxShadow: 'var(--sh-card-2)', border: '1px solid var(--border-2)' }}>
+            <img
+              src={poster}
+              alt={`Choriste du mois : ${data.profiles?.full_name}`}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+            />
+          </div>
+        ) : (
+          <div className="center stack" style={{ marginBottom: 22 }}>
+            <div style={{ position: 'relative', padding: 4, borderRadius: '50%', background: 'var(--grad-btn-gold)' }}>
+              <Avatar name={data.profiles?.full_name} initials={data.profiles?.avatar_initials} url={data.profiles?.photo_url} size={120} bg="var(--pink-bg)" color="var(--pink)" />
+              <div className="center" style={{ position: 'absolute', bottom: 0, right: 0, width: 34, height: 34, borderRadius: '50%', background: 'var(--grad-btn-gold)', border: '3px solid #fff' }}>
+                <Trophy size={16} color="#fff" weight="fill" />
+              </div>
+            </div>
+          </div>
+        )}
 
         {data.motivation && (
           <div className="card" style={{ padding: 18, marginBottom: 16 }}>
