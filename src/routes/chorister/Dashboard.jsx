@@ -7,6 +7,7 @@ import { TabHeader } from '../../components/Layout'
 import { Avatar, Loader } from '../../components/ui'
 import { shortDateTime, monthName } from '../../lib/format'
 import { pupitreLabel, categoryLabel } from '../../data/enums'
+import { messageOfTheDay } from '../../data/dailyMessages'
 
 export default function Dashboard() {
   const nav = useNavigate()
@@ -23,6 +24,7 @@ export default function Dashboard() {
   }, [])
 
   const isRepet = (ev, i) => (ev.type ? /rep/i.test(ev.type) : i === 0)
+  const msg = messageOfTheDay()
 
   return (
     <>
@@ -37,9 +39,9 @@ export default function Dashboard() {
         <div style={{ borderRadius: 20, padding: 22, background: 'var(--grad-banner)', color: '#fff', position: 'relative', overflow: 'hidden' }}>
           <div style={{ font: '700 11px var(--font-ui)', letterSpacing: 1.4, color: 'var(--cyan-light)', marginBottom: 12 }}>✦ MESSAGE DU JOUR</div>
           <p className="serif" style={{ font: 'italic 700 18px var(--font-serif)', lineHeight: 1.5, margin: '0 0 12px' }}>
-            « Chantez au Seigneur un cantique nouveau, chantez au Seigneur, terre entière. »
+            « {msg.text} »
           </p>
-          <span style={{ font: '500 12px var(--font-ui)', color: 'rgba(255,255,255,.75)' }}>Psaume 96</span>
+          <span style={{ font: '500 12px var(--font-ui)', color: 'rgba(255,255,255,.75)' }}>{msg.ref}</span>
         </div>
 
         {/* Prochains événements : Répétition + Messe côte à côte */}
