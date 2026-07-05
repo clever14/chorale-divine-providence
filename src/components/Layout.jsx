@@ -33,8 +33,9 @@ export function BackHeader({ title, right, onDark = false, onBack }) {
   )
 }
 
-/** En-tête d'onglet principal : gros titre + cloche/messages. */
-export function TabHeader({ title, greeting, name, avatar }) {
+/** En-tête d'onglet principal : gros titre + cloche/messages.
+    `titleStyle` (optionnel) permet d'ajuster la taille pour les titres longs. */
+export function TabHeader({ title, greeting, name, avatar, titleStyle }) {
   const nav = useNavigate()
   return (
     <div className="spread" style={{ padding: '4px 20px 14px' }}>
@@ -47,7 +48,7 @@ export function TabHeader({ title, greeting, name, avatar }) {
           </div>
         </button>
       ) : (
-        <span className="big-title">{title}</span>
+        <span className="big-title" style={titleStyle}>{title}</span>
       )}
       <div className="row" style={{ gap: 16, color: 'var(--navy)' }}>
         <button className="tap" onClick={() => nav('/messages')} style={{ position: 'relative', display: 'flex' }} aria-label="Messages">
