@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import {
   Heart, ChatCircle, Image as ImageIcon, SealCheck, PaperPlaneTilt,
-  BookmarkSimple, DotsThree, MicrophoneStage, VideoCamera, MusicNote, Trash
+  BookmarkSimple, DotsThree, Megaphone, VideoCamera, MusicNote, Trash, X
 } from '@phosphor-icons/react'
 import { supabase, publicUrl, uploadFile } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
@@ -43,6 +43,7 @@ export default function Feed() {
   const [composing, setComposing] = useState(false)
   const [commentsPost, setCommentsPost] = useState(null)
   const [menuFor, setMenuFor] = useState(null)
+  const [lightbox, setLightbox] = useState(null)
   const [posts, setPosts] = useState([])
 
   // Ouverture du compositeur via le bouton central "+" de la barre d'onglets.
@@ -125,7 +126,7 @@ export default function Feed() {
 
   return (
     <>
-      <TabHeader title="Le Fil" />
+      <TabHeader title="Actualité de la chorale" titleStyle={{ fontSize: 19 }} />
 
       <div className="pad" style={{ paddingBottom: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
         {/* Compositeur "Partager quelque chose…" */}
@@ -140,13 +141,13 @@ export default function Feed() {
         {loading ? <Loader /> : !posts.length ? (
           <div className="center stack" style={{ gap: 10, padding: '46px 30px', textAlign: 'center' }}>
             <div style={{ color: 'var(--cyan-soft)' }}><ImageIcon size={42} weight="light" /></div>
-            <div style={{ font: '700 15px var(--font-serif)', color: 'var(--title)' }}>Le fil est vide</div>
+            <div style={{ font: '700 15px var(--font-serif)', color: 'var(--title)' }}>Aucune actualité pour le moment</div>
             <div style={{ font: '400 13px var(--font-ui)', color: 'var(--muted)', lineHeight: 1.6 }}>Soyez le premier à partager une nouvelle avec la chorale.</div>
           </div>
         ) : posts.map((post) => {
           const photo = post.photo_url ? publicUrl('feed-photos', post.photo_url) : null
           const verified = post.is_official || post.profiles?.role === 'admin' || post.profiles?.pupitre === 'chef_choeur'
-          const name = post.is_official ? 'Le Chef de chœur' : post.profiles?.full_name
+          const name = post.is_official ? 'Service Communication' : post.profiles?.full_name
           const canManage = post.author_id === user.id || isAdmin
           // Texte de résumé "X réactions · Y commentaires".
           const parts = []
@@ -160,7 +161,7 @@ export default function Feed() {
               <div className="row" style={{ gap: 12, padding: 16 }}>
                 {post.is_official ? (
                   <div className="center" style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--navy)', color: '#fff', flexShrink: 0 }}>
-                    <MicrophoneStage size={22} weight="fill" />
+                    <Megaphone size={22} weight="fill" />
                   </div>
                 ) : (
                   <button className="tap" onClick={() => nav(`/members/${post.author_id}`)} aria-label={`Profil de ${name}`} style={{ display: 'flex', flexShrink: 0 }}>
@@ -215,7 +216,7 @@ export default function Feed() {
                 ) : isAudio(photo) ? (
                   <div style={{ padding: '4px 16px 16px' }}><AudioPlayer src={photo} /></div>
                 ) : (
-                  <img src={photo} alt="" style={{ width: '100%', height: 'auto', display: 'block', background: 'var(--field-bg)' }} />
+                  <img src={photo} alt="" onClick={() => setLightbox(photo)} style={{ width: '100%', height: 'auto', display: 'block', background: 'var(--field-bg)', cursor: 'zoom-in' }} />
                 )
               )}
 
@@ -269,6 +270,16 @@ export default function Feed() {
           onAdded={(id) => setPosts((list) => list.map((p) => (p.id === id ? { ...p, _comments: p._comments + 1 } : p)))}
           notify={show}
         />
+      )}
+
+      {/* Visionneuse plein écran (zoom image, façon Facebook) */}
+      {lightbox && (
+        <div onClick={() => setLightbox(null)} style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,.93)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, animation: 'fadeIn .18s ease' }}>
+          <button className="tap" onClick={() => setLightbox(null)} aria-label="Fermer" style={{ position: 'absolute', top: 'calc(14px + var(--safe-top))', right: 16, color: '#fff', display: 'flex' }}>
+            <X size={30} weight="bold" />
+          </button>
+          <img src={lightbox} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: 6 }} />
+        </div>
       )}
     </>
   )
