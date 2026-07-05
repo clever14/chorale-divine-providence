@@ -18,8 +18,11 @@ const isVideo = (u) => /\.(mp4|webm|mov|m4v|avi|mkv)($|\?)/i.test(u)
 const isAudio = (u) => /\.(mp3|m4a|wav|ogg|aac|flac)($|\?)/i.test(u)
 
 // Sélection commune (profil auteur + rôle pour le badge + compteurs).
+// NB : `profiles!author_id` lève l'ambiguïté « more than one relationship » —
+// on force le lien direct posts.author_id -> profiles (la table post_bookmarks
+// introduit sinon une 2e relation posts <-> profiles vue comme du many-to-many).
 const POST_SELECT =
-  '*, profiles(full_name, avatar_initials, pupitre, photo_url, role), post_reactions(user_id), post_comments(id)'
+  '*, profiles!author_id(full_name, avatar_initials, pupitre, photo_url, role), post_reactions(user_id), post_comments(id)'
 
 // Normalise une ligne serveur en objet prêt pour l'affichage + mises à jour optimistes.
 function normalize(post, uid) {
@@ -401,7 +404,7 @@ function CommentsSheet({ post, userId, onClose, onAdded, notify }) {
   const { data, loading, reload } = useAsync(async () => {
     const { data } = await supabase
       .from('post_comments')
-      .select('*, profiles(full_name, avatar_initials, photo_url)')
+      .select('*, profiles!author_id(full_name, avatar_initials, photo_url)')
       .eq('post_id', post.id)
       .order('created_at')
     return data || []
