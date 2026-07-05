@@ -17,38 +17,69 @@ input, textarea, button, select { font-family: inherit; }
 button { border: none; background: none; cursor: pointer; color: inherit; }
 a { color: inherit; text-decoration: none; }
 
-/* ============ Cadre de conception 392 x 812 ============ */
-/* Sur grand écran : téléphone centré. Sur mobile : plein cadre. */
+/* ============ Coquille responsive (mobile-first) ============ */
+/* Base : l'application occupe TOUT l'écran, avec une hauteur fluide (100dvh)
+   qui suit dynamiquement les barres du navigateur. S'applique à tous les
+   téléphones ET tablettes -> plus aucun débordement ni cadre coupé. */
 .app-shell {
   min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at 50% -10%, #0a3a8c, #041f60 55%, #02112f);
-  padding: 24px;
+  background: var(--app-bg);
 }
 .phone {
   position: relative;
-  width: 392px;
-  height: 812px;
-  background: #0a0f1f;
-  border-radius: 52px;
-  padding: 9px;
-  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(255, 255, 255, 0.04);
+  width: 100%;
+  height: 100dvh;
+  background: var(--app-bg);
+  overflow: hidden;
 }
 .phone-screen {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 44px;
   overflow: hidden;
   background: var(--app-bg);
 }
-@media (max-width: 480px) {
-  .app-shell { padding: 0; background: var(--app-bg); }
-  .phone { width: 100%; height: 100dvh; border-radius: 0; padding: 0; box-shadow: none; }
-  .phone-screen { border-radius: 0; }
-  /* iOS zoome sur un champ dont la police fait < 16px : on force 16px sur mobile. */
+
+/* Tablette et plus large : colonne centrée de largeur confortable, pleine
+   hauteur. Le contenu (pensé mobile) n'est ni étiré ni rogné. */
+@media (min-width: 600px) {
+  .app-shell {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    background: radial-gradient(circle at 50% -10%, #0a3a8c, #041f60 55%, #02112f);
+  }
+  .phone {
+    width: 440px;
+    max-width: 100%;
+    height: 100dvh;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Ordinateur (pointeur précis / souris) : cadre « téléphone » décoratif
+   flottant. Sa hauteur est PLAFONNÉE pour ne jamais déborder verticalement. */
+@media (min-width: 600px) and (pointer: fine) {
+  .app-shell {
+    align-items: center;
+    padding: 24px;
+  }
+  .phone {
+    height: min(860px, calc(100dvh - 48px));
+    max-width: 100%;
+    background: #0a0f1f;
+    border-radius: 46px;
+    padding: 8px;
+    box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(255, 255, 255, 0.04);
+  }
+  .phone-screen {
+    border-radius: 40px;
+  }
+}
+
+/* iOS zoome sur un champ dont la police fait < 16px : on force 16px sur tous
+   les appareils tactiles (téléphones ET iPad) pour supprimer l'auto-zoom. */
+@media (pointer: coarse) {
   .field, input, textarea, select { font-size: 16px; }
 }
 
