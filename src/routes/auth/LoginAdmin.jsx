@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ShieldStar, IdentificationCard, Lock, Eye, EyeSlash, ArrowRight } from '@phosphor-icons/react'
+import { IdentificationCard, Lock, Eye, EyeSlash, ArrowRight } from '@phosphor-icons/react'
 import { supabase } from '../../lib/supabase'
 import { StatusBar } from '../../components/Layout'
 import { useToast } from '../../context/ToastContext'
@@ -36,15 +36,13 @@ export default function LoginAdmin() {
   return (
     <div className="screen" style={{ background: 'linear-gradient(180deg,#02153f,#041f60 60%,#02112f)' }}>
       <StatusBar />
-      <div className="screen-scroll" style={{ padding: '4px 30px 30px' }}>
+      <div className="screen-scroll" style={{ padding: '4px 30px 30px', display: 'flex', flexDirection: 'column' }}>
         <button className="tap" onClick={() => nav(-1)} style={{ color: '#fff', display: 'flex', marginBottom: 24 }} aria-label="Retour">
           <CaretLeft size={24} weight="bold" />
         </button>
 
         <div className="center stack" style={{ gap: 14, marginBottom: 30 }}>
-          <div className="center" style={{ width: 62, height: 62, borderRadius: 18, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)' }}>
-            <ShieldStar size={30} weight="fill" color="var(--gold-light)" />
-          </div>
+          <img src="/logo-gold-pad.png" alt="Chorale Divine Providence" style={{ width: 140, height: 'auto', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 6px 18px rgba(224,169,43,.3))' }} />
           <div className="center stack" style={{ gap: 6 }}>
             <span style={{ font: '700 24px var(--font-serif)', color: '#fff' }}>Accès administrateur</span>
             <span style={{ font: 'italic 400 13px var(--font-serif)', color: 'var(--cyan-soft)' }}>Réservé à l'administrateur de la chorale</span>
@@ -74,8 +72,8 @@ export default function LoginAdmin() {
           {busy ? 'Connexion…' : "Entrer dans l'espace admin"} <ArrowRight size={18} weight="bold" />
         </button>
 
-        <p style={{ textAlign: 'center', marginTop: 20, font: '400 11px var(--font-ui)', color: 'rgba(255,255,255,.45)', lineHeight: 1.6 }}>
-          Accès distinct des comptes choristes.<br />Un seul administrateur par chorale.
+        <p style={{ textAlign: 'center', marginTop: 'auto', paddingTop: 24, font: '400 11.5px var(--font-ui)', color: 'rgba(255,255,255,.45)', lineHeight: 1.6 }}>
+          Connectez-vous pour accéder au tableau de bord et gérer votre chorale en toute simplicité !
         </p>
       </div>
     </div>
