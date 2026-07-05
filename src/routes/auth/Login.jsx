@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UserCircle, Lock, ShieldStar } from '@phosphor-icons/react'
+import { UserCircle, Lock, ShieldStar, ArrowRight } from '@phosphor-icons/react'
 import { supabase } from '../../lib/supabase'
 import { looksLikeEmail, isSyntheticEmail } from '../../lib/config'
 import { Screen, BackHeader } from '../../components/Layout'
@@ -37,10 +37,14 @@ export default function Login() {
 
   return (
     <Screen>
-      <BackHeader title="Connexion" />
+      <BackHeader />
       <div className="pad" style={{ paddingTop: 10, paddingBottom: 30 }}>
-        <div className="center stack" style={{ gap: 12, marginBottom: 26 }}>
+        <div className="center stack" style={{ marginBottom: 12 }}>
           <img src="/logo-pad.png" alt="" style={{ width: 150 }} />
+        </div>
+        <div className="center stack" style={{ gap: 4, marginBottom: 26, textAlign: 'center' }}>
+          <span style={{ font: '700 23px var(--font-serif)', color: 'var(--title)' }}>Bon retour parmi nous</span>
+          <span style={{ font: 'italic 400 13px var(--font-serif)', color: 'var(--body-2)' }}>Connectez-vous à votre compte</span>
         </div>
 
         <Field
@@ -50,7 +54,7 @@ export default function Login() {
           placeholder="+225 … ou vous@mail.com"
           icon={<UserCircle size={19} />}
         />
-        <Field label="Mot de passe" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" icon={<Lock size={19} />} />
+        <Field label="Mot de passe" type="password" reveal value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" icon={<Lock size={19} />} />
 
         <div style={{ textAlign: 'right', margin: '-6px 0 16px' }}>
           <button className="tap" onClick={() => setForgot(true)} style={{ font: '600 12.5px var(--font-ui)', color: 'var(--cyan-dark)' }}>
@@ -58,9 +62,18 @@ export default function Login() {
           </button>
         </div>
 
-        <Button variant="primary" onClick={submit} disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</Button>
+        <Button variant="primary" onClick={submit} disabled={busy}>
+          {busy ? 'Connexion…' : <>Se connecter <ArrowRight size={18} weight="bold" /></>}
+        </Button>
 
-        <button className="tap center" onClick={() => nav('/admin/login')} style={{ marginTop: 22, gap: 6, color: 'var(--muted-2)' }}>
+        <div className="center" style={{ marginTop: 20, gap: 6 }}>
+          <span style={{ font: '400 13px var(--font-ui)', color: 'var(--muted)' }}>Pas encore de compte ?</span>
+          <button className="tap" onClick={() => nav('/')} style={{ font: '700 13px var(--font-ui)', color: 'var(--cyan-dark)' }}>
+            Saisir un code
+          </button>
+        </div>
+
+        <button className="tap center" onClick={() => nav('/admin/login')} style={{ marginTop: 18, gap: 6, color: 'var(--muted-2)' }}>
           <ShieldStar size={16} />
           <span style={{ font: '600 12px var(--font-ui)' }}>Accès administrateur</span>
         </button>
