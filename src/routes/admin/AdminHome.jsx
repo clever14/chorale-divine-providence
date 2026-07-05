@@ -6,7 +6,7 @@ import { StatusBar } from '../../components/Layout'
 import { useAuth } from '../../context/AuthContext'
 
 const TILES = [
-  { to: '/admin/announcement', icon: <Megaphone size={22} weight="fill" />, title: 'Annonce', sub: 'Publier au fil' },
+  { to: '/admin/announcements', icon: <Megaphone size={22} weight="fill" />, title: 'Annonces', sub: 'Publier & gérer' },
   { to: '/admin/event', icon: <CalendarPlus size={22} weight="fill" />, title: 'Événement', sub: "Ajouter à l'agenda" },
   { to: '/admin/chorist-of-month', icon: <Trophy size={22} weight="fill" />, title: 'Choriste du mois', sub: 'Désigner' },
   { to: '/admin/songs', icon: <MusicNotes size={22} weight="fill" />, title: 'Chants', sub: 'Gérer le répertoire' },
