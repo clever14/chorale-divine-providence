@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { CaretLeft, Bell, EnvelopeSimple } from '@phosphor-icons/react'
+import { CaretLeft, Bell, ChatCircle } from '@phosphor-icons/react'
+import { useUnread } from '../context/UnreadContext'
 
 export function StatusBar() {
   // Plus de faux "9:41" : on ne garde qu'une réserve d'espace pour la safe-area iOS.
@@ -33,10 +34,11 @@ export function BackHeader({ title, right, onDark = false, onBack }) {
   )
 }
 
-/** En-tête d'onglet principal : gros titre + cloche/messages.
+/** En-tête d'onglet principal : gros titre + messages/cloche.
     `titleStyle` (optionnel) permet d'ajuster la taille pour les titres longs. */
 export function TabHeader({ title, greeting, name, avatar, titleStyle }) {
   const nav = useNavigate()
+  const { total } = useUnread()
   return (
     <div className="spread" style={{ padding: '4px 20px 14px' }}>
       {greeting ? (
@@ -52,8 +54,8 @@ export function TabHeader({ title, greeting, name, avatar, titleStyle }) {
       )}
       <div className="row" style={{ gap: 16, color: 'var(--navy)' }}>
         <button className="tap" onClick={() => nav('/messages')} style={{ position: 'relative', display: 'flex' }} aria-label="Messages">
-          <EnvelopeSimple size={24} />
-          <Dot />
+          <ChatCircle size={24} />
+          <CountBadge count={total} />
         </button>
         <button className="tap" onClick={() => nav('/notifications')} style={{ position: 'relative', display: 'flex' }} aria-label="Notifications">
           <Bell size={24} />
@@ -61,6 +63,22 @@ export function TabHeader({ title, greeting, name, avatar, titleStyle }) {
         </button>
       </div>
     </div>
+  )
+}
+
+/** Badge rouge chiffré (ex. messages non lus). Rien si le compteur est à 0. */
+function CountBadge({ count }) {
+  if (!count) return null
+  return (
+    <span style={{
+      position: 'absolute', top: -6, right: -8, minWidth: 17, height: 17, padding: '0 4px',
+      borderRadius: 9, background: 'var(--red)', color: '#fff',
+      font: '700 10px var(--font-ui)', lineHeight: 1,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      border: '2px solid var(--app-bg)'
+    }}>
+      {count > 99 ? '99+' : count}
+    </span>
   )
 }
 
