@@ -56,4 +56,20 @@ export function timeAgo(date) {
   return `il y a ${Math.floor(diff / 86400)} j`
 }
 
+/** Horodatage compact pour la liste des conversations (façon maquette) :
+ *  "14:20" aujourd'hui, "Hier", "Lun"…"Dim" (< 7 jours), sinon "12/06". */
+export function messageTime(date) {
+  if (!date) return ''
+  const d = new Date(date)
+  const now = new Date()
+  const startOfDay = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+  const days = Math.round((startOfDay(now) - startOfDay(d)) / 86400000)
+  if (days <= 0) {
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
+  if (days === 1) return 'Hier'
+  if (days < 7) return DAYS[d.getDay()]
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
 export { MONTHS, DAYS }
