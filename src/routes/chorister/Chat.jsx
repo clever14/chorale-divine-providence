@@ -101,7 +101,7 @@ export default function Chat() {
             onKeyDown={(e) => e.key === 'Enter' && send()}
             placeholder="Votre message…"
             className="field"
-            style={{ borderRadius: 22 }}
+            style={{ borderRadius: 22, flex: 1, minWidth: 0, width: 'auto' }}
           />
           <button className="tap center" onClick={send} disabled={!text.trim()} style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--grad-btn-cyan)', flexShrink: 0 }} aria-label="Envoyer">
             <PaperPlaneTilt size={20} color="#fff" weight="fill" />
