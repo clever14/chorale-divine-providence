@@ -60,12 +60,14 @@ export default function Messages() {
     }).sort((a, b) => new Date(b.last?.created_at || 0) - new Date(a.last?.created_at || 0))
   }, [])
 
-  // Membres joignables (pour le composeur « + »).
+  // Membres joignables (pour le composeur « + ») — choristes uniquement :
+  // on ne démarre pas de conversation avec le Service Communication.
   const { data: members } = useAsync(async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_initials, photo_url, role, pupitre')
+      .select('id, full_name, avatar_initials, photo_url, pupitre')
       .eq('status', 'active')
+      .eq('role', 'chorister')
       .neq('id', user.id)
       .order('full_name')
     return data || []
@@ -99,10 +101,7 @@ export default function Messages() {
   }
 
   const filtered = (data || []).filter((c) => !q || c.title.toLowerCase().includes(q.toLowerCase()))
-  const filteredMembers = (members || []).filter((m) => {
-    const label = m.role === 'admin' ? 'Service Communication' : (m.full_name || '')
-    return !composeQ || label.toLowerCase().includes(composeQ.toLowerCase())
-  })
+  const filteredMembers = (members || []).filter((m) => !composeQ || (m.full_name || '').toLowerCase().includes(composeQ.toLowerCase()))
 
   const NewButton = (
     <button
@@ -174,23 +173,16 @@ export default function Messages() {
             <EmptyState title="Aucun membre" text="Aucun membre ne correspond à cette recherche." />
           ) : (
             <div className="stack" style={{ gap: 8, paddingBottom: 4 }}>
-              {filteredMembers.map((m) => {
-                const official = m.role === 'admin'
-                const label = official ? 'Service Communication' : m.full_name
-                const sub = official ? 'Administration de la chorale' : pupitreLabel(m.pupitre)
-                return (
-                  <button key={m.id} className="tap row" disabled={starting} onClick={() => startWith(m.id)}
-                    style={{ width: '100%', textAlign: 'left', gap: 12, padding: '10px 12px', borderRadius: 14, background: 'var(--field-bg)' }}>
-                    {official
-                      ? <OfficialAvatar size={42} />
-                      : <Avatar name={m.full_name} initials={m.avatar_initials} url={m.photo_url} size={42} bg="var(--pink-bg)" color="var(--pink)" />}
-                    <div className="stack grow" style={{ minWidth: 0 }}>
-                      <span style={{ font: '700 13.5px var(--font-ui)', color: 'var(--title)' }}>{label}</span>
-                      <span style={{ font: '400 11.5px var(--font-ui)', color: 'var(--muted)' }}>{sub}</span>
-                    </div>
-                  </button>
-                )
-              })}
+              {filteredMembers.map((m) => (
+                <button key={m.id} className="tap row" disabled={starting} onClick={() => startWith(m.id)}
+                  style={{ width: '100%', textAlign: 'left', gap: 12, padding: '10px 12px', borderRadius: 14, background: 'var(--field-bg)' }}>
+                  <Avatar name={m.full_name} initials={m.avatar_initials} url={m.photo_url} size={42} bg="var(--pink-bg)" color="var(--pink)" />
+                  <div className="stack grow" style={{ minWidth: 0 }}>
+                    <span style={{ font: '700 13.5px var(--font-ui)', color: 'var(--title)' }}>{m.full_name}</span>
+                    <span style={{ font: '400 11.5px var(--font-ui)', color: 'var(--muted)' }}>{pupitreLabel(m.pupitre)}</span>
+                  </div>
+                </button>
+              ))}
             </div>
           )}
         </Sheet>
