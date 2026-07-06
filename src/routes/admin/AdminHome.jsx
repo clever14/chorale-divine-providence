@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ShieldStar, UserCirclePlus, Megaphone, CalendarPlus, Trophy, MusicNotes, Users, ChartBar, Ticket, Scroll, IdentificationBadge, CaretRight, SignOut, UsersThree, MusicNotesSimple, CalendarCheck } from '@phosphor-icons/react'
+import { ShieldStar, UserCirclePlus, Megaphone, CalendarPlus, Trophy, MusicNotes, Users, ChartBar, Ticket, Scroll, IdentificationBadge, CaretRight, SignOut, UsersThree, MusicNotesSimple, CalendarCheck, ChatCircle } from '@phosphor-icons/react'
 import { supabase } from '../../lib/supabase'
 import { useAsync } from '../../hooks/useAsync'
 import { StatusBar } from '../../components/Layout'
@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 
 const TILES = [
   { to: '/admin/announcements', icon: <Megaphone size={22} weight="fill" />, title: 'Annonces', sub: 'Publier & gérer' },
+  { to: '/admin/message', icon: <ChatCircle size={22} weight="fill" />, title: 'Messagerie', sub: 'Écrire aux choristes' },
   { to: '/admin/event', icon: <CalendarPlus size={22} weight="fill" />, title: 'Événement', sub: "Ajouter à l'agenda" },
   { to: '/admin/chorist-of-month', icon: <Trophy size={22} weight="fill" />, title: 'Choriste du mois', sub: 'Désigner' },
   { to: '/admin/songs', icon: <MusicNotes size={22} weight="fill" />, title: 'Chants', sub: 'Gérer le répertoire' },
