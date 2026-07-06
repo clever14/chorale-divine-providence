@@ -4,6 +4,7 @@ import { useAsync } from '../../hooks/useAsync'
 import { Screen, BackHeader } from '../../components/Layout'
 import { Loader, EmptyState } from '../../components/ui'
 import { useToast } from '../../context/ToastContext'
+import { inviteUrl } from '../../lib/config'
 import { timeAgo } from '../../lib/format'
 
 export default function Invitations() {
@@ -25,10 +26,14 @@ export default function Invitations() {
 
   const share = async () => {
     if (!data?.active) return
-    const text = `Rejoignez la Chorale Divine Providence avec ce code : ${data.active.code} (valable 7 jours, usage unique).`
+    const link = inviteUrl(data.active.code)
+    const text =
+      `Rejoignez la Chorale Divine Providence 🎶\n\n` +
+      `Votre code d'invitation : ${data.active.code} (valable 7 jours, usage unique).\n\n` +
+      `Inscrivez-vous directement ici : ${link}`
     try {
-      if (navigator.share) await navigator.share({ text, title: 'Code chorale' })
-      else { await navigator.clipboard.writeText(text); show('Copié dans le presse-papier', 'success') }
+      if (navigator.share) await navigator.share({ text, title: 'Chorale Divine Providence' })
+      else { await navigator.clipboard.writeText(text); show('Message copié dans le presse-papier', 'success') }
     } catch { /* utilisateur a annulé */ }
   }
 
