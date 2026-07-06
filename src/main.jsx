@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
+import { UnreadProvider } from './context/UnreadContext'
 import './theme/global.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <div className="phone">
             <div className="phone-screen">
               <ToastProvider>
-                <App />
+                <UnreadProvider>
+                  <App />
+                </UnreadProvider>
               </ToastProvider>
             </div>
           </div>
