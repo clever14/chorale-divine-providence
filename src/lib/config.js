@@ -42,3 +42,8 @@ export function looksLikeEmail(v) {
 export function loginUrl() {
   return `${window.location.origin}/login`
 }
+
+/** Lien d'inscription pré-rempli avec un code d'invitation (pour le partage). */
+export function inviteUrl(code) {
+  return `${window.location.origin}/register?code=${encodeURIComponent(code)}`
+}
