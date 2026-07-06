@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { PaperPlaneTilt } from '@phosphor-icons/react'
+import { PaperPlaneTilt, Info } from '@phosphor-icons/react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useUnread } from '../../context/UnreadContext'
@@ -86,19 +86,28 @@ export default function Chat() {
         </div>
       )}
 
-      <div className="row" style={{ padding: '10px 14px calc(14px + var(--safe-bottom))', gap: 10, borderTop: '1px solid var(--border-2)', background: 'var(--card-bg)' }}>
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && send()}
-          placeholder="Votre message…"
-          className="field"
-          style={{ borderRadius: 22 }}
-        />
-        <button className="tap center" onClick={send} disabled={!text.trim()} style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--grad-btn-cyan)', flexShrink: 0 }} aria-label="Envoyer">
-          <PaperPlaneTilt size={20} color="#fff" weight="fill" />
-        </button>
-      </div>
+      {isOfficial ? (
+        <div className="row" style={{ padding: '14px 16px calc(14px + var(--safe-bottom))', gap: 10, borderTop: '1px solid var(--border-2)', background: 'var(--card-bg)' }}>
+          <Info size={18} weight="fill" color="var(--muted)" style={{ flexShrink: 0 }} />
+          <span style={{ font: '400 12.5px var(--font-ui)', color: 'var(--muted)', lineHeight: 1.45 }}>
+            Messages du Service Communication — la réponse n'est pas disponible.
+          </span>
+        </div>
+      ) : (
+        <div className="row" style={{ padding: '10px 14px calc(14px + var(--safe-bottom))', gap: 10, borderTop: '1px solid var(--border-2)', background: 'var(--card-bg)' }}>
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && send()}
+            placeholder="Votre message…"
+            className="field"
+            style={{ borderRadius: 22 }}
+          />
+          <button className="tap center" onClick={send} disabled={!text.trim()} style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--grad-btn-cyan)', flexShrink: 0 }} aria-label="Envoyer">
+            <PaperPlaneTilt size={20} color="#fff" weight="fill" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
