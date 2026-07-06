@@ -100,11 +100,13 @@ export default function MemberPublic() {
 
         <div className="pad" style={{ paddingTop: 18, paddingBottom: 30 }}>
           {/* Actions */}
-          {!isSelf && (
+          {!isSelf && (p.role !== 'admin' || p.phone) && (
             <div className="row" style={{ gap: 10, marginBottom: 18 }}>
-              <button className="btn btn-primary tap grow" onClick={startConversation} disabled={starting}>
-                <PaperPlaneTilt size={18} weight="fill" /> {starting ? 'Ouverture…' : 'Envoyer un message'}
-              </button>
+              {p.role !== 'admin' && (
+                <button className="btn btn-primary tap grow" onClick={startConversation} disabled={starting}>
+                  <PaperPlaneTilt size={18} weight="fill" /> {starting ? 'Ouverture…' : 'Envoyer un message'}
+                </button>
+              )}
               {p.phone && (
                 <a href={`tel:${p.phone}`} className="tap center" style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(3,159,200,.1)', color: 'var(--cyan-dark)', flexShrink: 0 }} aria-label="Appeler">
                   <Phone size={20} weight="fill" />
