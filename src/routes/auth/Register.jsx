@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { SealCheck, EnvelopeSimple, Phone, Lock } from '@phosphor-icons/react'
 import { supabase } from '../../lib/supabase'
 import { PUPITRES } from '../../data/enums'
@@ -11,12 +11,14 @@ import { useToast } from '../../context/ToastContext'
 export default function Register() {
   const nav = useNavigate()
   const { state } = useLocation()
+  const [searchParams] = useSearchParams()
   const { show } = useToast()
-  const initialCode = state?.code || ''
+  // Le code peut venir de l'écran d'accueil (state) ou d'un lien partagé (?code=CDP-XXXX).
+  const initialCode = (state?.code || searchParams.get('code') || '').toUpperCase()
 
   const [code, setCode] = useState(initialCode)
   const [codeValid, setCodeValid] = useState(false)
-  // email est désormais FACULTATIF ; le téléphone est l'identifiant principal.
+  // email est FACULTATIF ; le téléphone est l'identifiant principal.
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', pupitre: 'soprano', password: '' })
   const [busy, setBusy] = useState(false)
 
@@ -39,14 +41,28 @@ export default function Register() {
     if (form.password.length < 6) {
       show('Le mot de passe doit faire au moins 6 caractères.', 'error'); return
     }
+
+    // Le code d'invitation est OBLIGATOIRE.
+    const cleanCode = code.trim().toUpperCase()
+    if (!/^CDP-[A-Z0-9]{4}$/.test(cleanCode)) {
+      show("Un code d'invitation valide est requis (format CDP-XXXX).", 'error'); return
+    }
+
     setBusy(true)
+
+    // Vérification serveur : le code doit être valide, non expiré et non utilisé.
+    const { data: valid, error: checkErr } = await supabase.rpc('check_invitation', { p_code: cleanCode })
+    if (checkErr || !valid) {
+      setBusy(false)
+      show("Ce code d'invitation est invalide, expiré ou déjà utilisé.", 'error'); return
+    }
 
     // L'email d'authentification est l'email réel s'il est fourni,
     // sinon un email synthétique dérivé du numéro de téléphone.
     const hasRealEmail = !!form.email.trim()
     const authEmail = hasRealEmail ? form.email.trim() : phoneToAuthEmail(form.phone)
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: authEmail,
       password: form.password,
       options: {
@@ -60,13 +76,12 @@ export default function Register() {
     })
     if (error) { setBusy(false); show(traduireErreur(error.message), 'error'); return }
 
-    // Le code d'invitation, s'il est valide, est consommé (usage unique).
-    // Il ne suffit PLUS à activer le compte : la validation par l'admin est requise.
-    if (codeValid) {
-      await supabase.rpc('redeem_invitation', { p_code: code })
-    }
+    // Le code d'invitation est consommé (usage unique). L'activation du compte
+    // reste soumise à la validation de l'administrateur.
+    try {
+      await supabase.rpc('redeem_invitation', { p_code: cleanCode })
+    } catch { /* code consommé entre-temps : l'admin traitera la demande */ }
 
-    // Toute nouvelle inscription part en attente de validation par l'administrateur.
     setBusy(false)
     nav('/pending', { replace: true, state: { reason: 'admin' } })
   }
@@ -84,12 +99,17 @@ export default function Register() {
             </div>
           </div>
         ) : (
-          <Field
-            label="Code d'invitation (facultatif)"
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="CDP-XXXX"
-          />
+          <>
+            <Field
+              label="Code d'invitation"
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="CDP-XXXX"
+            />
+            <p style={{ font: '400 12px var(--font-ui)', color: 'var(--muted)', lineHeight: 1.5, margin: '-8px 0 16px' }}>
+              Obligatoire — demandez votre code à l'administrateur de la chorale.
+            </p>
+          </>
         )}
 
         <Field label="Prénom & nom" value={form.full_name} onChange={set('full_name')} placeholder="Ex. Marie Kouassi" />
