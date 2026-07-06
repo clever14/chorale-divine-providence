@@ -44,9 +44,12 @@ export default function Welcome() {
           </div>
         </div>
 
-        <Button variant="primary" onClick={() => nav('/register', { state: { code: full } })}>
+        <Button variant="primary" disabled={code.length < 4} onClick={() => nav('/register', { state: { code: full } })}>
           Créer un compte
         </Button>
+        <p style={{ font: '400 12px var(--font-ui)', color: 'var(--muted)', textAlign: 'center', margin: '10px 0 0' }}>
+          Un code d'invitation est nécessaire pour s'inscrire.
+        </p>
 
         <div className="center" style={{ marginTop: 16, gap: 6 }}>
           <span style={{ font: '400 13px var(--font-ui)', color: 'var(--muted)' }}>Déjà membre ?</span>
