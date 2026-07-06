@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import {
   Heart, ChatCircle, Image as ImageIcon, SealCheck, PaperPlaneTilt,
-  BookmarkSimple, DotsThree, Megaphone, VideoCamera, MusicNote, Trash, X
+  BookmarkSimple, DotsThree, Megaphone, VideoCamera, MusicNote, Trash, X, PencilSimple
 } from '@phosphor-icons/react'
 import { supabase, publicUrl, uploadFile } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
@@ -17,18 +17,35 @@ import { timeAgo } from '../../lib/format'
 const isVideo = (u) => /\.(mp4|webm|mov|m4v|avi|mkv)($|\?)/i.test(u)
 const isAudio = (u) => /\.(mp3|m4a|wav|ogg|aac|flac)($|\?)/i.test(u)
 
+// Réactions disponibles. 'like' = ❤️ (compatible avec les données existantes).
+const REACTIONS = [
+  { kind: 'like', emoji: '❤️', label: "J'aime" },
+  { kind: 'pray', emoji: '🙏', label: 'Amen' },
+  { kind: 'clap', emoji: '👏', label: 'Bravo' }
+]
+const R_BY_KIND = Object.fromEntries(REACTIONS.map((r) => [r.kind, r]))
+const emojiFor = (k) => R_BY_KIND[k]?.emoji || '❤️'
+const labelFor = (k) => R_BY_KIND[k]?.label || "J'aime"
+
 // Sélection commune (profil auteur + rôle pour le badge + compteurs).
 // NB : `profiles!author_id` lève l'ambiguïté « more than one relationship » —
 // on force le lien direct posts.author_id -> profiles (la table post_bookmarks
 // introduit sinon une 2e relation posts <-> profiles vue comme du many-to-many).
 const POST_SELECT =
-  '*, profiles!author_id(full_name, avatar_initials, pupitre, photo_url, role), post_reactions(user_id), post_comments(id)'
+  '*, profiles!author_id(full_name, avatar_initials, pupitre, photo_url, role), post_reactions(user_id, kind), post_comments(id)'
 
 // Normalise une ligne serveur en objet prêt pour l'affichage + mises à jour optimistes.
 function normalize(post, uid) {
+  const counts = {}
+  for (const r of post.post_reactions || []) {
+    const k = r.kind || 'like'
+    counts[k] = (counts[k] || 0) + 1
+  }
+  const mine = post.post_reactions?.find((r) => r.user_id === uid)
   return {
     ...post,
-    _liked: post.post_reactions?.some((r) => r.user_id === uid) || false,
+    _counts: counts,                                  // { like: n, pray: m, clap: k }
+    _myKind: mine ? mine.kind || 'like' : null,       // ma réaction (ou null)
     _reactions: post.post_reactions?.length || 0,
     _comments: post.post_comments?.length || 0,
     _saved: post.post_bookmarks?.some((b) => b.user_id === uid) || false
@@ -43,6 +60,8 @@ export default function Feed() {
   const [composing, setComposing] = useState(false)
   const [commentsPost, setCommentsPost] = useState(null)
   const [menuFor, setMenuFor] = useState(null)
+  const [pickerFor, setPickerFor] = useState(null)
+  const [editingPost, setEditingPost] = useState(null)
   const [lightbox, setLightbox] = useState(null)
   const [posts, setPosts] = useState([])
 
@@ -78,17 +97,30 @@ export default function Feed() {
   const patch = (id, changes) =>
     setPosts((list) => list.map((p) => (p.id === id ? { ...p, ...changes } : p)))
 
-  // Réaction "J'aime" (optimiste : l'écran répond immédiatement, la base suit).
-  const toggleReaction = async (post) => {
-    const liked = !post._liked
-    patch(post.id, { _liked: liked, _reactions: post._reactions + (liked ? 1 : -1) })
-    const q = liked
-      ? supabase.from('post_reactions').insert({ post_id: post.id, user_id: user.id, kind: 'like' })
-      : supabase.from('post_reactions').delete().match({ post_id: post.id, user_id: user.id, kind: 'like' })
-    const { error } = await q
-    if (error) {
-      patch(post.id, { _liked: post._liked, _reactions: post._reactions }) // revient en arrière
-      show('Action impossible pour le moment.', 'error')
+  // Réaction multi-emoji (une seule par personne et par post, façon Facebook).
+  const react = async (post, kind) => {
+    const prev = { _counts: post._counts, _myKind: post._myKind, _reactions: post._reactions }
+    const counts = { ...post._counts }
+    const had = post._myKind
+    if (had) counts[had] = Math.max(0, (counts[had] || 0) - 1)
+    let myKind
+    if (had === kind) {
+      myKind = null // on retire sa réaction en re-cliquant la même
+    } else {
+      myKind = kind
+      counts[kind] = (counts[kind] || 0) + 1
+    }
+    Object.keys(counts).forEach((k) => { if (counts[k] <= 0) delete counts[k] })
+    const total = Object.values(counts).reduce((a, b) => a + b, 0)
+    patch(post.id, { _counts: counts, _myKind: myKind, _reactions: total })
+
+    // Persistance : on retire l'ancienne réaction puis on pose la nouvelle.
+    const del = await supabase.from('post_reactions').delete().match({ post_id: post.id, user_id: user.id })
+    if (!del.error && myKind) {
+      const { error } = await supabase.from('post_reactions').insert({ post_id: post.id, user_id: user.id, kind: myKind })
+      if (error) { patch(post.id, prev); show('Réaction impossible pour le moment.', 'error') }
+    } else if (del.error) {
+      patch(post.id, prev); show('Réaction impossible pour le moment.', 'error')
     }
   }
 
@@ -116,6 +148,12 @@ export default function Feed() {
     } else {
       show('Publication supprimée', 'success')
     }
+  }
+
+  // Après édition : on remplace uniquement le texte/titre/edited_at (on garde réactions & enregistrement).
+  const onEdited = (changes) => {
+    setEditingPost(null)
+    patch(changes.id, { body: changes.body, title: changes.title, edited_at: changes.edited_at })
   }
 
   // Ajout instantané en tête de fil après publication (logique façon Facebook).
@@ -154,6 +192,7 @@ export default function Feed() {
           if (post._reactions > 0) parts.push(`${post._reactions} réaction${post._reactions > 1 ? 's' : ''}`)
           if (post._comments > 0) parts.push(`${post._comments} commentaire${post._comments > 1 ? 's' : ''}`)
           const summary = parts.join(' · ')
+          const topKinds = Object.entries(post._counts || {}).sort((a, b) => b[1] - a[1]).map(([k]) => k).slice(0, 3)
 
           return (
             <div key={post.id} className="card" style={{ overflow: 'hidden' }}>
@@ -180,7 +219,7 @@ export default function Feed() {
                     {verified && <SealCheck size={15} weight="fill" color="var(--cyan)" />}
                   </div>
                   <span style={{ font: '400 11px var(--font-ui)', color: 'var(--muted)' }}>
-                    {timeAgo(post.created_at)}{post.is_official ? ' · Annonce officielle' : ''}
+                    {timeAgo(post.created_at)}{post.is_official ? ' · Annonce officielle' : ''}{post.edited_at ? ' · Modifié' : ''}
                   </span>
                 </button>
 
@@ -193,6 +232,11 @@ export default function Feed() {
                       <>
                         <div onClick={() => setMenuFor(null)} style={{ position: 'fixed', inset: 0, zIndex: 60 }} />
                         <div className="card" style={{ position: 'absolute', right: 0, top: 30, zIndex: 61, minWidth: 172, padding: 6, boxShadow: 'var(--sh-card-2)' }}>
+                          {post.author_id === user.id && (
+                            <button className="row tap" onClick={() => { setMenuFor(null); setEditingPost(post) }} style={{ gap: 10, padding: '10px 12px', width: '100%', color: 'var(--title)' }}>
+                              <PencilSimple size={18} /> <span style={{ font: '600 13px var(--font-ui)' }}>Modifier</span>
+                            </button>
+                          )}
                           <button className="row tap" onClick={() => { setMenuFor(null); deletePost(post) }} style={{ gap: 10, padding: '10px 12px', width: '100%', color: 'var(--red)' }}>
                             <Trash size={18} /> <span style={{ font: '600 13px var(--font-ui)' }}>Supprimer</span>
                           </button>
@@ -222,10 +266,14 @@ export default function Feed() {
 
               {/* Résumé réactions / commentaires */}
               {summary && (
-                <button className="row tap" onClick={() => setCommentsPost(post)} style={{ gap: 7, padding: '12px 16px 4px', width: '100%' }}>
-                  {post._reactions > 0 && (
-                    <span className="center" style={{ width: 21, height: 21, borderRadius: '50%', background: 'var(--red)', color: '#fff', border: '2px solid var(--card-bg)' }}>
-                      <Heart size={11} weight="fill" />
+                <button className="row tap" onClick={() => setCommentsPost(post)} style={{ gap: 8, padding: '12px 16px 4px', width: '100%' }}>
+                  {topKinds.length > 0 && (
+                    <span style={{ display: 'flex' }}>
+                      {topKinds.map((k, i) => (
+                        <span key={k} className="center" style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--field-bg)', border: '2px solid var(--card-bg)', fontSize: 12, marginLeft: i ? -8 : 0, zIndex: 3 - i }}>
+                          {emojiFor(k)}
+                        </span>
+                      ))}
                     </span>
                   )}
                   <span style={{ font: '500 12px var(--font-ui)', color: 'var(--muted)' }}>{summary}</span>
@@ -234,10 +282,34 @@ export default function Feed() {
 
               {/* Barre d'actions */}
               <div className="row" style={{ padding: '8px 8px', borderTop: '1px solid var(--border-3)' }}>
-                <button className="tap center grow" onClick={() => toggleReaction(post)} style={{ gap: 7, padding: '6px 0', color: post._liked ? 'var(--red)' : 'var(--body-2)' }}>
-                  <Heart size={19} weight={post._liked ? 'fill' : 'regular'} />
-                  <span style={{ font: '600 12.5px var(--font-ui)' }}>Réagir</span>
-                </button>
+                <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
+                  <button className="tap center" onClick={() => setPickerFor(pickerFor === post.id ? null : post.id)} style={{ gap: 7, padding: '6px 0', width: '100%', color: post._myKind ? 'var(--title)' : 'var(--body-2)' }}>
+                    {post._myKind ? (
+                      <>
+                        <span style={{ fontSize: 17, lineHeight: 1 }}>{emojiFor(post._myKind)}</span>
+                        <span style={{ font: '700 12.5px var(--font-ui)', color: 'var(--cyan-dark)' }}>{labelFor(post._myKind)}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Heart size={19} />
+                        <span style={{ font: '600 12.5px var(--font-ui)' }}>Réagir</span>
+                      </>
+                    )}
+                  </button>
+                  {pickerFor === post.id && (
+                    <>
+                      <div onClick={() => setPickerFor(null)} style={{ position: 'fixed', inset: 0, zIndex: 70 }} />
+                      <div className="card row" style={{ position: 'absolute', bottom: 'calc(100% + 8px)', left: 8, zIndex: 71, gap: 2, padding: 6, borderRadius: 30, boxShadow: 'var(--sh-card-2)' }}>
+                        {REACTIONS.map((r) => (
+                          <button key={r.kind} className="tap center" onClick={() => { react(post, r.kind); setPickerFor(null) }} aria-label={r.label}
+                            style={{ width: 42, height: 42, borderRadius: '50%', fontSize: 24, lineHeight: 1, background: post._myKind === r.kind ? 'var(--field-bg)' : 'transparent' }}>
+                            {r.emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
                 <button className="tap center grow" onClick={() => setCommentsPost(post)} style={{ gap: 7, padding: '6px 0', color: 'var(--body-2)' }}>
                   <ChatCircle size={19} />
                   <span style={{ font: '600 12.5px var(--font-ui)' }}>Commenter</span>
@@ -258,6 +330,15 @@ export default function Feed() {
           isAdmin={isAdmin}
           onClose={() => setComposing(false)}
           onPublished={onPublished}
+          notify={show}
+        />
+      )}
+
+      {editingPost && (
+        <EditSheet
+          post={editingPost}
+          onClose={() => setEditingPost(null)}
+          onSaved={onEdited}
           notify={show}
         />
       )}
@@ -404,6 +485,50 @@ function Composer({ profile, userId, isAdmin, onClose, onPublished, notify }) {
           )
         })}
       </div>
+    </Sheet>
+  )
+}
+
+/* ---------------------------------------------------------------- Édition */
+function EditSheet({ post, onClose, onSaved, notify }) {
+  const [body, setBody] = useState(post.body || '')
+  const [title, setTitle] = useState(post.title || '')
+  const [busy, setBusy] = useState(false)
+
+  const save = async () => {
+    const b = body.trim()
+    if (!b && !post.photo_url) { notify('Le texte ne peut pas être vide.', 'error'); return }
+    setBusy(true)
+    const payload = { body: b }
+    if (post.is_official) payload.title = title.trim() || null
+
+    const nowIso = new Date().toISOString()
+    let usedEdited = true
+    // On tente d'horodater la modification ; repli si la colonne edited_at n'existe pas encore.
+    let res = await supabase.from('posts').update({ ...payload, edited_at: nowIso }).eq('id', post.id)
+    if (res.error) {
+      usedEdited = false
+      res = await supabase.from('posts').update(payload).eq('id', post.id)
+    }
+    setBusy(false)
+    if (res.error) { notify(res.error.message, 'error'); return }
+    notify('Publication modifiée', 'success')
+    onSaved({ id: post.id, body: b, title: post.is_official ? payload.title : post.title, edited_at: usedEdited ? nowIso : post.edited_at })
+  }
+
+  return (
+    <Sheet title="Modifier la publication" onClose={onClose}
+      footer={<Button variant="primary" onClick={save} disabled={busy}>{busy ? 'Enregistrement…' : 'Enregistrer'}</Button>}>
+      {post.is_official && (
+        <input className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre de l'annonce" style={{ marginBottom: 12 }} />
+      )}
+      <textarea className="field" value={body} onChange={(e) => setBody(e.target.value)}
+        placeholder="Votre message…" style={{ minHeight: 120 }} />
+      {post.photo_url && (
+        <p style={{ font: '400 11.5px var(--font-ui)', color: 'var(--muted)', marginTop: 10, marginBottom: 0 }}>
+          Le média joint n'est pas modifié ici.
+        </p>
+      )}
     </Sheet>
   )
 }
