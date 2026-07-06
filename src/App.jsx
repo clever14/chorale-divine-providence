@@ -32,6 +32,7 @@ import AdminHome from './routes/admin/AdminHome'
 import ValidateAccounts from './routes/admin/ValidateAccounts'
 import Announcement from './routes/admin/Announcement'
 import AdminAnnouncements from './routes/admin/AdminAnnouncements'
+import AdminMessage from './routes/admin/AdminMessage'
 import EventForm from './routes/admin/EventForm'
 import ChoristOfMonthAdmin from './routes/admin/ChoristOfMonthAdmin'
 import SongsAdmin from './routes/admin/SongsAdmin'
@@ -96,6 +97,7 @@ export default function App() {
         <Route path="/admin/accounts" element={<ValidateAccounts />} />
         <Route path="/admin/announcement" element={<Announcement />} />
         <Route path="/admin/announcements" element={<AdminAnnouncements />} />
+        <Route path="/admin/message" element={<AdminMessage />} />
         <Route path="/admin/event" element={<EventForm />} />
         <Route path="/admin/chorist-of-month" element={<ChoristOfMonthAdmin />} />
         <Route path="/admin/songs" element={<SongsAdmin />} />
