@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { PaperPlaneTilt } from '@phosphor-icons/react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { useUnread } from '../../context/UnreadContext'
 import { useAsync } from '../../hooks/useAsync'
 import { BackHeader } from '../../components/Layout'
 import { Loader } from '../../components/ui'
@@ -11,13 +12,14 @@ import { timeOnly } from '../../lib/format'
 export default function Chat() {
   const { id } = useParams()
   const { user } = useAuth()
+  const { markRead } = useUnread()
   const [text, setText] = useState('')
   const [messages, setMessages] = useState([])
   const scrollRef = useRef(null)
 
   const { data, loading } = useAsync(async () => {
     const [{ data: conv }, { data: msgs }] = await Promise.all([
-      supabase.from('conversations').select('*, conversation_members(user_id, profiles(full_name, avatar_initials))').eq('id', id).maybeSingle(),
+      supabase.from('conversations').select('*, conversation_members(user_id, profiles(full_name, avatar_initials, role))').eq('id', id).maybeSingle(),
       supabase.from('messages').select('*').eq('conversation_id', id).order('created_at')
     ])
     return { conv, initial: msgs || [] }
@@ -27,15 +29,22 @@ export default function Chat() {
     if (data?.initial) setMessages(data.initial)
   }, [data])
 
-  // Realtime : nouveaux messages
+  // Marque la conversation comme lue à l'ouverture (retire le badge).
+  useEffect(() => { markRead(id) }, [id, markRead])
+
+  // Temps réel : nouveaux messages
   useEffect(() => {
     const channel = supabase
       .channel(`chat:${id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${id}` },
-        (payload) => setMessages((m) => [...m, payload.new]))
+        (payload) => {
+          setMessages((m) => [...m, payload.new])
+          // Message reçu pendant que le fil est ouvert -> on le marque lu.
+          if (payload.new?.sender_id !== user.id) markRead(id)
+        })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [id])
+  }, [id, user.id, markRead])
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 1e9, behavior: 'smooth' })
@@ -49,7 +58,8 @@ export default function Chat() {
   }
 
   const other = data?.conv?.conversation_members?.find((m) => m.user_id !== user.id)?.profiles
-  const title = data?.conv?.title || other?.full_name || 'Conversation'
+  const isOfficial = other?.role === 'admin'
+  const title = data?.conv?.title || (isOfficial ? 'Service Communication' : other?.full_name) || 'Conversation'
 
   return (
     <div className="screen">
