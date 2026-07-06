@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PaperPlaneTilt, MagnifyingGlass, Megaphone, Tray, CheckCircle } from '@phosphor-icons/react'
+import { PaperPlaneTilt, MagnifyingGlass, Megaphone, CheckCircle } from '@phosphor-icons/react'
 import { supabase } from '../../lib/supabase'
 import { useAsync } from '../../hooks/useAsync'
 import { Screen, BackHeader } from '../../components/Layout'
@@ -52,16 +52,9 @@ export default function AdminMessage() {
     }
   }
 
-  const inboxButton = (
-    <button className="tap center" onClick={() => nav('/messages')} aria-label="Boîte de réception"
-      style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--field-bg)', color: 'var(--navy)', flexShrink: 0 }}>
-      <Tray size={20} weight="fill" />
-    </button>
-  )
-
   return (
     <Screen>
-      <BackHeader title="Messagerie" right={inboxButton} />
+      <BackHeader title="Messagerie" />
       <div className="pad" style={{ paddingBottom: 30 }}>
         {/* Bandeau explicatif */}
         <div className="row" style={{ gap: 12, padding: 14, background: 'rgba(3,159,200,.08)', borderRadius: 14, marginBottom: 18 }}>
@@ -69,7 +62,7 @@ export default function AdminMessage() {
             <Megaphone size={18} weight="fill" />
           </div>
           <p style={{ font: '400 12.5px var(--font-ui)', color: 'var(--body-2)', margin: 0, lineHeight: 1.5 }}>
-            Vos messages arrivent aux choristes sous le nom <strong>« Service Communication »</strong>. Chacun le reçoit dans sa conversation privée.
+            Vos messages arrivent aux choristes sous le nom <strong>« Service Communication »</strong>. Chacun le reçoit dans sa conversation privée ; les choristes ne peuvent pas y répondre.
           </p>
         </div>
 
